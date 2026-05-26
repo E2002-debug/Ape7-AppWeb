@@ -83,6 +83,12 @@ DATABASES = {
     }
 }
 
+# CONFIGURACIÓN DE PRODUCCIÓN PARA AZURE:
+# Si el entorno detecta que está corriendo en la nube de Azure,
+# cambia el archivo de base de datos a /tmp para evitar bloqueos y el error 502 Bad Gateway.
+if 'WEBSITE_HOSTNAME' in os.environ:
+    DATABASES['default']['NAME'] = '/tmp/db.sqlite3'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
