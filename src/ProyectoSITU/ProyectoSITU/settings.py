@@ -28,6 +28,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# Configuración de Seguridad CSRF para los formularios en Azure
+CSRF_TRUSTED_ORIGINS = [
+    'https://ape7-appweb-gkdsa2d0gbfkaqfq.eastus2-01.azurewebsites.net'
+]
+
 
 # Application definition
 
@@ -76,18 +81,22 @@ WSGI_APPLICATION = 'ProyectoSITU.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Forzamos a que tanto en local como en la nube, si estamos desplegando en Linux/Azure,
+# la base de datos apunte de forma fija a /tmp para evitar bloqueos del sistema de archivos compartidos.
+if os.name != 'nt':  # Si no es Windows (es decir, es el Linux de Azure)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': '/tmp/db.sqlite3',
+        }
     }
-}
-
-# CONFIGURACIÓN DE PRODUCCIÓN PARA AZURE:
-# Si el entorno detecta que está corriendo en la nube de Azure,
-# cambia el archivo de base de datos a /tmp para evitar bloqueos y el error 502 Bad Gateway.
-if 'WEBSITE_HOSTNAME' in os.environ:
-    DATABASES['default']['NAME'] = '/tmp/db.sqlite3'
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
